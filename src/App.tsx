@@ -1,6 +1,4 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -13,31 +11,32 @@ function App() {
       .catch(() => setApiStatus("error"));
   }, []);
 
+  const dotColor =
+    apiStatus === "connected" ? "#22c55e" : apiStatus === "error" ? "#ef4444" : "#ccc";
+  const textColor =
+    apiStatus === "connected" ? "#16a34a" : apiStatus === "error" ? "#dc2626" : undefined;
+  const statusText =
+    apiStatus === "checking"
+      ? "Checking API\u2026"
+      : apiStatus === "connected"
+        ? "API connected"
+        : "API unreachable";
+
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="mx-auto max-w-2xl space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>React App</CardTitle>
-            <CardDescription>
-              Built with React, TypeScript, Tailwind CSS, and shadcn/ui
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">API Status:</span>
-              <Badge variant={apiStatus === "connected" ? "default" : apiStatus === "error" ? "destructive" : "secondary"}>
-                {apiStatus === "checking" ? "Checking..." : apiStatus === "connected" ? "Connected" : "Unreachable"}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Edit <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">src/App.tsx</code> to start building.
-              Add API routes in <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">routes.py</code>.
-            </p>
-            <Button onClick={() => window.location.reload()}>Refresh</Button>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Card>
+        <CardContent className="pt-6 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Welcome to your React Web App</h1>
+          <p className="text-muted-foreground">Start building something amazing.</p>
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full"
+              style={{ background: dotColor }}
+            />
+            <span style={{ color: textColor }}>{statusText}</span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
