@@ -1,13 +1,14 @@
+import type { ApiStatus, HealthResponse } from "./types";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
 function App() {
-  const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "error">("checking");
+  const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
 
   useEffect(() => {
     fetch("/api/health")
       .then((r) => r.json())
-      .then((data) => setApiStatus(data?.ok ? "connected" : "error"))
+      .then((data: HealthResponse) => setApiStatus(data?.ok ? "connected" : "error"))
       .catch(() => setApiStatus("error"));
   }, []);
 
