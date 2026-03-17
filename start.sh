@@ -11,7 +11,8 @@ uv sync
 bun install
 
 # Start FastAPI backend on internal port (background)
-uv run uvicorn app:asgi --reload --host 0.0.0.0 --port $BACKEND_PORT &
+uv run uvicorn app:asgi --reload --host 0.0.0.0 --port $BACKEND_PORT \
+  --reload-exclude ".venv" --reload-exclude ".git" --reload-exclude "__pycache__" --reload-exclude "*.pyc" --reload-exclude "node_modules" &
 BACKEND_PID=$!
 
 # Start Vite dev server on the assigned port (foreground)
