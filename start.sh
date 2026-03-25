@@ -7,15 +7,49 @@ set -e
 VITE_PORT=${APP_PORT:-5173}
 BACKEND_PORT=3001
 
-uv sync
-bun install
+# Startup timing
+T0=$(date +%s%3N 2>/dev/null || python3 -c "import time;print(int(time.time()*1000))")
+elapsed() { echo $(( $(date +%s%3N 2>/dev/null || python3 -c "import time;print(int(time.time()*1000))") - T0 )); }
 
-# Start FastAPI backend on internal port (background)
+# Install Python and JS deps in parallel, with lockfile hash guards
+(
+  UV_HASH=$(md5sum uv.lock 2>/dev/null | cut -d' ' -f1)
+  if [ ! -f ".venv/.uv-hash-$UV_HASH" ]; then
+    echo "[+$(elapsed)ms] uv sync starting..."
+    uv sync --compile-bytecode --frozen 2>&1 || uv sync --compile-bytecode 2>&1
+    rm -f .venv/.uv-hash-* 2>/dev/null
+    touch ".venv/.uv-hash-$UV_HASH"
+    echo "[+$(elapsed)ms] uv sync done"
+  else
+    echo "[+$(elapsed)ms] uv sync skipped (lockfile unchanged)"
+  fi
+) &
+UV_PID=$!
+
+(
+  BUN_HASH=$(md5sum bun.lock 2>/dev/null | cut -d' ' -f1)
+  if [ ! -f "node_modules/.bun-hash-$BUN_HASH" ]; then
+    echo "[+$(elapsed)ms] bun install starting..."
+    bun install --frozen-lockfile 2>&1 || bun install 2>&1
+    rm -f node_modules/.bun-hash-* 2>/dev/null
+    touch "node_modules/.bun-hash-$BUN_HASH"
+    echo "[+$(elapsed)ms] bun install done"
+  else
+    echo "[+$(elapsed)ms] bun install skipped (lockfile unchanged)"
+  fi
+) &
+BUN_PID=$!
+
+# Start FastAPI as soon as Python deps are ready (background)
+wait $UV_PID
+echo "[+$(elapsed)ms] Starting FastAPI on port $BACKEND_PORT"
 uv run uvicorn app:asgi --reload --host 0.0.0.0 --port $BACKEND_PORT \
   --reload-exclude ".venv" --reload-exclude ".git" --reload-exclude "__pycache__" --reload-exclude "*.pyc" --reload-exclude "node_modules" &
 BACKEND_PID=$!
 
-# Start Vite dev server on the assigned port (foreground)
+# Start Vite as soon as JS deps are ready (foreground)
+wait $BUN_PID
+echo "[+$(elapsed)ms] Starting Vite on port $VITE_PORT"
 bunx --bun vite --host 0.0.0.0 --port $VITE_PORT
 
 # Cleanup backend when Vite exits
