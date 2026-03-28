@@ -13,5 +13,8 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:3001",
     },
+    watch: {
+      ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
+    },
   },
 });
