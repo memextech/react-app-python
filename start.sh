@@ -11,7 +11,7 @@ export VITE_BACKEND_PORT=$BACKEND_PORT
 # Port conflict guard — active in Workshop sandbox, skipped elsewhere
 if [ -f /usr/local/lib/workshop-devguard.sh ]; then
     source /usr/local/lib/workshop-devguard.sh
-    devguard_acquire "$VITE_PORT"
+    devguard_acquire "$VITE_PORT" "$BACKEND_PORT"
 fi
 
 # Startup timing
