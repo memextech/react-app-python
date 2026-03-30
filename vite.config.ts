@@ -17,8 +17,5 @@ export default defineConfig({
     watch: {
       ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
     },
-    watch: {
-      ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
-    },
   },
 });
