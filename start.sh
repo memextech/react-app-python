@@ -23,7 +23,7 @@ elapsed() { echo $(( $(date +%s%3N 2>/dev/null || python3 -c "import time;print(
   UV_HASH=$(md5sum uv.lock 2>/dev/null | cut -d' ' -f1)
   if [ ! -f ".venv/.uv-hash-$UV_HASH" ]; then
     echo "[+$(elapsed)ms] uv sync starting..."
-    uv sync --compile-bytecode --frozen 2>&1 || uv sync --compile-bytecode 2>&1
+    uv sync --compile-bytecode --frozen
     rm -f .venv/.uv-hash-* 2>/dev/null
     touch ".venv/.uv-hash-$UV_HASH"
     echo "[+$(elapsed)ms] uv sync done"
@@ -37,7 +37,7 @@ UV_PID=$!
   BUN_HASH=$(md5sum bun.lock 2>/dev/null | cut -d' ' -f1)
   if [ ! -f "node_modules/.bun-hash-$BUN_HASH" ]; then
     echo "[+$(elapsed)ms] bun install starting..."
-    bun install --frozen-lockfile 2>&1 || bun install 2>&1
+    bun install --frozen-lockfile
     rm -f node_modules/.bun-hash-* 2>/dev/null
     touch "node_modules/.bun-hash-$BUN_HASH"
     echo "[+$(elapsed)ms] bun install done"
