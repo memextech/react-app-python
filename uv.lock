@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.12"
 
 [options]
-exclude-newer = "2026-03-20T20:13:17.182756Z"
+exclude-newer = "2026-03-20T20:18:29.34645Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -240,7 +240,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", specifier = "==0.135.1" },
     { name = "httpx", specifier = "==0.28.1" },
-    { name = "python-multipart", specifier = ">=0.0.9" },
+    { name = "python-multipart", specifier = "==0.0.22" },
     { name = "uvicorn", specifier = "==0.41.0" },
     { name = "watchfiles", specifier = "==1.1.1" },
 ]

@@ -5,7 +5,14 @@ set -e
 # Vite dev server listens on APP_PORT so the sandbox proxy can reach it
 # FastAPI backend runs on an internal port, proxied by Vite
 VITE_PORT=${APP_PORT:-5173}
-BACKEND_PORT=3001
+BACKEND_PORT=$((VITE_PORT + 100))
+export VITE_BACKEND_PORT=$BACKEND_PORT
+
+# Port conflict guard — active in Workshop sandbox, skipped elsewhere
+if [ -f /usr/local/lib/workshop-devguard.sh ]; then
+    source /usr/local/lib/workshop-devguard.sh
+    devguard_acquire "$VITE_PORT" "$BACKEND_PORT"
+fi
 
 # Startup timing
 T0=$(date +%s%3N 2>/dev/null || python3 -c "import time;print(int(time.time()*1000))")
@@ -16,7 +23,7 @@ elapsed() { echo $(( $(date +%s%3N 2>/dev/null || python3 -c "import time;print(
   UV_HASH=$(md5sum uv.lock 2>/dev/null | cut -d' ' -f1)
   if [ ! -f ".venv/.uv-hash-$UV_HASH" ]; then
     echo "[+$(elapsed)ms] uv sync starting..."
-    uv sync --compile-bytecode --frozen 2>&1 || uv sync --compile-bytecode 2>&1
+    uv sync --compile-bytecode --frozen
     rm -f .venv/.uv-hash-* 2>/dev/null
     touch ".venv/.uv-hash-$UV_HASH"
     echo "[+$(elapsed)ms] uv sync done"
@@ -30,7 +37,7 @@ UV_PID=$!
   BUN_HASH=$(md5sum bun.lock 2>/dev/null | cut -d' ' -f1)
   if [ ! -f "node_modules/.bun-hash-$BUN_HASH" ]; then
     echo "[+$(elapsed)ms] bun install starting..."
-    bun install --frozen-lockfile 2>&1 || bun install 2>&1
+    bun install --frozen-lockfile
     rm -f node_modules/.bun-hash-* 2>/dev/null
     touch "node_modules/.bun-hash-$BUN_HASH"
     echo "[+$(elapsed)ms] bun install done"
@@ -50,7 +57,7 @@ BACKEND_PID=$!
 # Start Vite as soon as JS deps are ready (foreground)
 wait $BUN_PID
 echo "[+$(elapsed)ms] Starting Vite on port $VITE_PORT"
-bunx --bun vite --host 0.0.0.0 --port $VITE_PORT
+bunx vite --host 0.0.0.0 --port $VITE_PORT --strictPort
 
 # Cleanup backend when Vite exits
 kill $BACKEND_PID 2>/dev/null

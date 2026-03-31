@@ -10,8 +10,12 @@ export default defineConfig({
     },
   },
   server: {
+    strictPort: true,
     proxy: {
-      "/api": "http://localhost:3001",
+      "/api": `http://localhost:${process.env.VITE_BACKEND_PORT || 3101}`,
+    },
+    watch: {
+      ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
     },
     watch: {
       ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
