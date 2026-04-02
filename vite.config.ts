@@ -15,10 +15,13 @@ export default defineConfig({
       "/api": `http://localhost:${process.env.VITE_BACKEND_PORT || 3101}`,
     },
     watch: {
-      ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
-    },
-    watch: {
-      ignored: ["**/node_modules/**", "**/.venv/**", "**/.git/**", "**/dist/**", "**/__pycache__/**"],
+      ignored: [
+        "**/node_modules/**",
+        "**/.venv/**",
+        "**/.git/**",
+        "**/dist/**",
+        "**/__pycache__/**",
+      ],
     },
   },
 });
