@@ -23,7 +23,7 @@ elapsed() { echo $(( $(date +%s%3N 2>/dev/null || python3 -c "import time;print(
   UV_HASH=$(md5sum uv.lock 2>/dev/null | cut -d' ' -f1)
   if [ ! -f ".venv/.uv-hash-$UV_HASH" ]; then
     echo "[+$(elapsed)ms] uv sync starting..."
-    uv sync --compile-bytecode --frozen
+    uv sync --compile-bytecode --frozen || uv sync --compile-bytecode
     rm -f .venv/.uv-hash-* 2>/dev/null
     touch ".venv/.uv-hash-$UV_HASH"
     echo "[+$(elapsed)ms] uv sync done"
@@ -50,7 +50,7 @@ BUN_PID=$!
 # Start FastAPI as soon as Python deps are ready (background)
 wait $UV_PID
 echo "[+$(elapsed)ms] Starting FastAPI on port $BACKEND_PORT"
-uv run --frozen uvicorn app:asgi --reload --host 0.0.0.0 --port $BACKEND_PORT \
+uv run uvicorn app:asgi --reload --host 0.0.0.0 --port $BACKEND_PORT \
   --reload-exclude ".venv" --reload-exclude ".git" --reload-exclude "__pycache__" --reload-exclude "*.pyc" --reload-exclude "node_modules" &
 BACKEND_PID=$!
 
