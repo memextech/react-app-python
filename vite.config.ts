@@ -11,6 +11,7 @@ export default defineConfig({
   },
   server: {
     strictPort: true,
+    allowedHosts: true,
     proxy: {
       "/api": `http://localhost:${process.env.VITE_BACKEND_PORT || 3101}`,
     },
