@@ -14,9 +14,14 @@ if [ -f /usr/local/lib/workshop-devguard.sh ]; then
     devguard_acquire "$VITE_PORT" "$BACKEND_PORT"
 fi
 
-# Startup timing
-T0=$(date +%s%3N 2>/dev/null || python3 -c "import time;print(int(time.time()*1000))")
-elapsed() { echo $(( $(date +%s%3N 2>/dev/null || python3 -c "import time;print(int(time.time()*1000))") - T0 )); }
+# Startup timing — GNU date supports %3N (sandbox/Linux); BSD date (macOS) does not
+if [[ "$(date +%s%3N 2>/dev/null)" =~ ^[0-9]+$ ]]; then
+  now_ms() { date +%s%3N; }
+else
+  now_ms() { python3 -c "import time;print(int(time.time()*1000))"; }
+fi
+T0=$(now_ms)
+elapsed() { echo $(( $(now_ms) - T0 )); }
 
 # Install Python and JS deps in parallel, with lockfile hash guards
 (
