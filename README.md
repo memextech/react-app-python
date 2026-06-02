@@ -46,20 +46,14 @@ Local development does not include a real `X-Workshop-User` header, so the viewe
 
 The frontend cannot read navigation request headers directly, so it calls `/api/me` and renders the verified JSON response.
 
-## Deploy With Identity Passthrough
+## Publish With Identity Passthrough
 
-```bash
-wksp deploy --visibility private --identity-passthrough --port 3000
-```
+Publish the app from Workshop's web or desktop app. Open the project, choose
+Publish, turn on **Pass signed viewer identity to this app**, then publish or
+redeploy. Use private visibility when every request must identify a signed-in
+Workshop viewer.
 
-For the dev environment:
-
-```bash
-wksp --env dev project-create --name "Viewer identity demo"
-wksp --env dev deploy --visibility private --identity-passthrough --port 3000
-```
-
-The deployed app receives:
+The published app receives:
 
 | Value | Source |
 | --- | --- |
