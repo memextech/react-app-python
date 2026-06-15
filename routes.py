@@ -1,8 +1,10 @@
 import os
 
-from fastapi import FastAPI, APIRouter, Request
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+
+from workshop_identity import WORKSHOP_JWKS_PATH, require_workshop_user
 
 
 def create_app(static_dir: str) -> FastAPI:
@@ -10,7 +12,40 @@ def create_app(static_dir: str) -> FastAPI:
 
     @api.get("/health")
     def health():
-        return {"ok": True}
+        return {
+            "ok": True,
+            "workshop_custom_domain_configured": bool(
+                os.environ.get("WORKSHOP_CUSTOM_DOMAIN")
+            ),
+            "workshop_app_slug_configured": bool(os.environ.get("WORKSHOP_APP_SLUG")),
+        }
+
+    @api.get("/me")
+    def me(request: Request):
+        try:
+            user = require_workshop_user(request)
+        except HTTPException as exc:
+            if exc.status_code != 401:
+                raise
+            return JSONResponse(content={"authenticated": False})
+
+        return {
+            "authenticated": True,
+            "uid": user["uid"],
+            "email": user["email"],
+        }
+
+    @api.get("/identity-diagnostics")
+    def identity_diagnostics(request: Request):
+        public_domain = os.environ.get("WORKSHOP_CUSTOM_DOMAIN")
+        app_slug = os.environ.get("WORKSHOP_APP_SLUG")
+        return {
+            "header_present": bool(request.headers.get("x-workshop-user")),
+            "jwks_path": WORKSHOP_JWKS_PATH,
+            "public_domain": public_domain,
+            "app_slug": app_slug,
+            "ready_to_verify": bool(public_domain and app_slug),
+        }
 
     app = FastAPI()
     app.include_router(api, prefix="/api")
